@@ -30,7 +30,7 @@ fn is_valid(r: i32, c: i32, grid: &Vec<Vec<char>>, dir: &(i32, i32), to_match: &
             return false
         }
 
-        if grid[nr as usize][nc as usize] != to_match.chars().nth(i as usize - 1).unwrap() {
+        if grid[nr as usize][nc as usize] != to_match.as_bytes()[i as usize - 1] as char {
             return false
         }
     }
