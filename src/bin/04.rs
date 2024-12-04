@@ -1,108 +1,57 @@
-use std::collections::{HashMap, VecDeque};
+use std::collections::HashMap;
 
 advent_of_code::solution!(4);
-
-#[derive(Debug)]
-struct Cell {
-    row: i32,
-    col: i32,
-    ch: char,
-    dir: (i32, i32),
-}
 
 pub fn part_one(input: &str) -> Option<u32> {
     const DIRECTIONS: [(i32, i32); 8] = [(-1, 0), (1, 0), (0, -1), (0, 1), (-1, -1), (-1, 1), (1, -1), (1, 1)];
     let grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
-    let mut q: VecDeque<Cell> = VecDeque::new();
+    let mut count = 0;
     for r in 0..grid.len() {
         for c in 0..grid[0].len() {
             if grid[r][c] == 'X' {
-                q.push_back(Cell { row: r as i32, col: c as i32, ch: 'X', dir: (-2, -2)})
-            }
-        }
-    }
-    // bfs
-    let mut count = 0;
-    while let Some(cur) = q.pop_front() {
-        let next_ch = match cur.ch {
-            'X' => 'M',
-            'M' => 'A',
-            'A' => 'S',
-            'S' => {
-                count += 1;
-                continue;
-            }
-            _ => continue,
-        };
-
-        if next_ch == 'M' {
-            for &(dr, dc) in DIRECTIONS.iter() {
-                let nr: i32 = cur.row + dr;
-                let nc: i32 = cur.col + dc;
-                if nr < 0 || nr >= grid.len() as i32 || nc < 0 || nc >= grid[0].len() as i32 || grid[nr as usize][nc as usize] != next_ch
-                {
-                    continue;
+                for dir in DIRECTIONS.iter() {
+                    if is_valid(r as i32, c as i32, &grid, dir, "MAS") {
+                        count += 1;
+                    }
                 }
-                q.push_back(Cell{row:nr, col:nc, ch: next_ch, dir: (dr, dc)})
             }
-        } else {
-            let nr: i32 = cur.row + cur.dir.0;
-            let nc: i32 = cur.col + cur.dir.1;
-            if nr < 0 || nr >= grid.len() as i32 || nc < 0 || nc >= grid[0].len() as i32 || grid[nr as usize][nc as usize] != next_ch
-            {
-                continue;
-            }
-            q.push_back(Cell{row:nr, col:nc, ch: next_ch, dir: cur.dir})
         }
-
     }
     Some(count)
 }
 
+fn is_valid(r: i32, c: i32, grid: &Vec<Vec<char>>, dir: &(i32, i32), to_match: &str) -> bool {
+    let (dr, dc) = dir;
+    for i in 1..=to_match.len() as i32 {
+        let nr = r + i * dr;
+        let nc = c + i * dc;
+
+        if nr < 0 || nr >= grid.len() as i32 || nc < 0 || nc >= grid[0].len() as i32 {
+            return false
+        }
+
+        if grid[nr as usize][nc as usize] != to_match.chars().nth(i as usize - 1).unwrap() {
+            return false
+        }
+    }
+    true
+}
+
+
 pub fn part_two(input: &str) -> Option<usize> {
     const DIRECTIONS: [(i32, i32); 4] = [(-1, -1), (-1, 1), (1, -1), (1, 1)];
+    let mut a_s: HashMap<(i32, i32), usize> = HashMap::new();
     let grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
-    let mut q: VecDeque<Cell> = VecDeque::new();
     for r in 0..grid.len() {
         for c in 0..grid[0].len() {
             if grid[r][c] == 'M' {
-                q.push_back(Cell { row: r as i32, col: c as i32, ch: 'M', dir: (-2, -2)})
-            }
-        }
-    }
-    // bfs
-    let mut a_s: HashMap<(i32, i32), usize> = HashMap::new();
-    while let Some(cur) = q.pop_front() {
-        let next_ch = match cur.ch {
-            'M' => 'A',
-            'A' => 'S',
-            'S' => {
-                *a_s.entry((cur.row - cur.dir.0, cur.col - cur.dir.1)).or_insert(0) += 1;
-                continue;
-            }
-            _ => continue,
-        };
-
-        if next_ch == 'A' {
-            for &(dr, dc) in DIRECTIONS.iter() {
-                let nr: i32 = cur.row + dr;
-                let nc: i32 = cur.col + dc;
-                if nr < 0 || nr >= grid.len() as i32 || nc < 0 || nc >= grid[0].len() as i32 || grid[nr as usize][nc as usize] != next_ch
-                {
-                    continue;
+                for dir in DIRECTIONS.iter() {
+                    if is_valid(r as i32, c as i32, &grid, dir, "AS") {
+                        *a_s.entry((r as i32 + dir.0, c as i32 + dir.1)).or_insert(0) += 1;
+                    }
                 }
-                q.push_back(Cell{row:nr, col:nc, ch: next_ch, dir: (dr, dc)})
             }
-        } else {
-            let nr: i32 = cur.row + cur.dir.0;
-            let nc: i32 = cur.col + cur.dir.1;
-            if nr < 0 || nr >= grid.len() as i32 || nc < 0 || nc >= grid[0].len() as i32 || grid[nr as usize][nc as usize] != next_ch
-            {
-                continue;
-            }
-            q.push_back(Cell{row:nr, col:nc, ch: next_ch, dir: cur.dir})
         }
-
     }
     let count = a_s.iter().filter(|(_, &v)| v == 2).count();
     Some(count)
