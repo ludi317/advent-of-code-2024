@@ -37,7 +37,7 @@ pub fn part_one(input: &str) -> Option<usize> {
 }
 
 pub fn part_two(input: &str) -> Option<usize> {
-    let grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
+    let mut grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
     let mut sr: i32 = -1;
     let mut sc: i32 = -1;
     'outer: for row in 0..grid.len() {
@@ -52,7 +52,6 @@ pub fn part_two(input: &str) -> Option<usize> {
     let mut count = 0;
     for rr in 0..grid.len() {
         for cc in 0..grid[0].len() {
-            let mut grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
             if grid[rr][cc] == '.' {
                 grid[rr][cc] = '#'
             } else {
@@ -76,12 +75,14 @@ pub fn part_two(input: &str) -> Option<usize> {
                 }
                 if repeats == 100 {
                     count += 1;
+                    grid[rr][cc] = '.';
                     break
                 }
 
                 let nr = r + DIRECTIONS[dir_idx].0;
                 let nc = c + DIRECTIONS[dir_idx].1;
                 if nr < 0 || nr >= grid.len() as i32 || nc < 0 || nc >= grid[0].len() as i32 {
+                    grid[rr][cc] = '.';
                     break
                 }
                 if grid[nr as usize][nc as usize] == '#' {
