@@ -3,7 +3,7 @@ use std::collections::{HashMap, HashSet};
 advent_of_code::solution!(8);
 
 pub fn part_one(input: &str) -> Option<usize> {
-    let mut grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
+    let grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
     let mut antenna: HashMap<char, Vec<(i32, i32)>> = HashMap::new();
     for r in 0..grid.len() {
         for c in 0..grid[0].len() {
@@ -13,8 +13,7 @@ pub fn part_one(input: &str) -> Option<usize> {
         }
     }
     let mut antinodes: HashSet<(i32, i32)> = HashSet::new();
-    for (k, v) in antenna {
-        let locs = v;
+    for (_, locs) in antenna {
         for i in 0..locs.len() {
             for j in i+1..locs.len() {
                 let dx = locs[j].0 - locs[i].0;
@@ -50,23 +49,20 @@ pub fn part_two(input: &str) -> Option<usize> {
         }
     }
     let mut antinodes: HashSet<(i32, i32)> = HashSet::new();
-    for (k, v) in antenna {
-        let locs = v;
+    for (_, locs) in antenna {
         for i in 0..locs.len() {
             for j in i+1..locs.len() {
-                antinodes.insert((locs[i].0, locs[i].1));
-                antinodes.insert((locs[j].0, locs[j].1));
                 let dx = locs[j].0 - locs[i].0;
                 let dy = locs[j].1 - locs[i].1;
-                let mut nr1 = locs[j].0 + dx;
-                let mut nc1 = locs[j].1 + dy;
+                let mut nr1 = locs[j].0;
+                let mut nc1 = locs[j].1;
                 while is_in_bounds(&grid, nr1, nc1) {
                     antinodes.insert((nr1, nc1));
                     nr1 += dx;
                     nc1 += dy;
                 }
-                let mut nr2 = locs[i].0 - dx;
-                let mut nc2 = locs[i].1 - dy;
+                let mut nr2 = locs[i].0;
+                let mut nc2 = locs[i].1;
                 while is_in_bounds(&grid, nr2, nc2) {
                     antinodes.insert((nr2, nc2));
                     nr2 -= dx;
