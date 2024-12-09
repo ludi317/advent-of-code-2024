@@ -1,6 +1,40 @@
+use std::collections::VecDeque;
+
 advent_of_code::solution!(9);
 
 pub fn part_one(input: &str) -> Option<usize> {
+    let mut files: Vec<node> = Vec::new();
+    let mut spaces: VecDeque<usize> = VecDeque::new();
+    let mut idx = 0;
+    for (i, n) in input.bytes().enumerate() {
+        let count = (n - b'0') as usize;
+        if i % 2 == 0 {
+            files.push(node{ idx, count });
+        } else {
+            for j in 0..count {
+                spaces.push_back(idx + j);
+            }
+        }
+        idx += count;
+    }
+    let mut checksum = 0;
+    for id in (0..files.len()).rev() {
+        let mut f_idx = files[id].idx + files[id].count - 1;
+        for _ in 0..files[id].count {
+            if spaces.len() > 0 && *spaces.front().unwrap() < f_idx {
+                let s_idx = spaces.pop_front().unwrap();
+                checksum += id * s_idx;
+            } else {
+                checksum += id * f_idx;
+            }
+            f_idx = f_idx.saturating_sub(1);
+        }
+    }
+
+    Some(checksum)
+}
+
+pub fn part_one_slow(input: &str) -> Option<usize> {
     let mut id = 0;
     let space = 1<<31 - 1;
     let mut count: usize = 0;
@@ -22,7 +56,6 @@ pub fn part_one(input: &str) -> Option<usize> {
         }
     }
 
-
     let mut end = disk.len() - 1;
 
     let mut checksum = 0;
@@ -42,7 +75,63 @@ pub fn part_one(input: &str) -> Option<usize> {
     Some(checksum)
 }
 
+#[derive(Debug)]
+struct node {
+    idx: usize,
+    count: usize,
+}
+
 pub fn part_two(input: &str) -> Option<usize> {
+    let mut files: Vec<node> = Vec::new();
+    let mut spaces: Vec<node> = Vec::new();
+    let mut idx = 0;
+    for (i, n) in input.bytes().enumerate() {
+        let count = (n - b'0') as usize;
+        if i % 2 == 0 {
+            files.push(node{ idx, count });
+        } else {
+            spaces.push(node{ idx, count });
+        }
+        idx += count;
+    }
+    let mut checksum = 0;
+    for id in (0..files.len()).rev() {
+        let mut s = 0;
+        let mut moved = false;
+        while spaces[s].idx < files[id].idx {
+            // move files to first space that fits
+            if spaces[s].count >= files[id].count {
+                for i in 0..files[id].count {
+                    checksum += id * (spaces[s].idx + i);
+                }
+                // ^ optimized - but slower:
+                // checksum += files[id].count * id * spaces[s].idx +
+                //     id * files[id].count*(files[id].count - 1) / 2;
+
+                // fill up spaces
+                spaces[s].count -= files[id].count;
+                spaces[s].idx += files[id].count;
+                moved = true;
+                break
+            }
+            s += 1;
+        }
+        if !moved {
+            for i in 0..files[id].count {
+                checksum += id * (files[id].idx + i);
+            }
+            // ^ optimized - but slower:
+            // checksum += files[id].count * id * files[id].idx +
+            //     id * files[id].count*(files[id].count - 1) / 2;
+        }
+
+    }
+
+    Some(checksum)
+}
+
+
+pub fn part_two_slow(input: &str) -> Option<usize> {
     let mut id = 0;
     let space = 1<<31 - 1;
     let mut count: usize = 0;
