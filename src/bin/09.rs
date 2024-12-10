@@ -1,4 +1,5 @@
-use std::collections::VecDeque;
+use std::cmp::Reverse;
+use std::collections::{BinaryHeap, VecDeque};
 
 advent_of_code::solution!(9);
 
@@ -83,50 +84,44 @@ struct node {
 
 pub fn part_two(input: &str) -> Option<usize> {
     let mut files: Vec<node> = Vec::new();
-    let mut spaces: Vec<node> = Vec::new();
+    let mut spaces: [BinaryHeap<Reverse<usize>>; 10] = [(); 10].map(|_| BinaryHeap::new());
     let mut idx = 0;
     for (i, n) in input.bytes().enumerate() {
         let count = (n - b'0') as usize;
         if i % 2 == 0 {
             files.push(node{ idx, count });
         } else {
-            spaces.push(node{ idx, count });
+            spaces[count].push(Reverse(idx));
         }
         idx += count;
     }
+    // println!("{:?}", spaces);
     let mut checksum = 0;
     for id in (0..files.len()).rev() {
-        let mut s = 0;
-        let mut moved = false;
-        while spaces[s].idx < files[id].idx {
-            // move files to first space that fits
-            if spaces[s].count >= files[id].count {
-                for i in 0..files[id].count {
-                    checksum += id * (spaces[s].idx + i);
-                }
-                // ^ optimized - but slower:
-                // checksum += files[id].count * id * spaces[s].idx +
-                //     id * files[id].count*(files[id].count - 1) / 2;
 
-                // fill up spaces
-                spaces[s].count -= files[id].count;
-                spaces[s].idx += files[id].count;
-                moved = true;
-                break
+        let min_space_count = (files[id].count..10)
+            .filter_map(|c| {
+                spaces[c].peek().map(|Reverse(idx)| (c, *idx))
+            })
+            .filter(|&(_, idx)| idx < files[id].idx)
+            .min_by_key(|&(_, idx)| idx)
+            .map(|(c, _)| c);
+
+        if let Some(count) = min_space_count {
+            let Reverse(idx) = spaces[count].pop().unwrap();
+            for i in 0..files[id].count {
+                checksum += id * (idx + i)
             }
-            s += 1;
-        }
-        if !moved {
+            let count = count - files[id].count;
+            if count > 0 {
+                spaces[count].push(Reverse(idx + files[id].count));
+            }
+        } else {
             for i in 0..files[id].count {
                 checksum += id * (files[id].idx + i);
             }
-            // ^ optimized - but slower:
-            // checksum += files[id].count * id * files[id].idx +
-            //     id * files[id].count*(files[id].count - 1) / 2;
         }
-
     }
-
     Some(checksum)
 }
 
