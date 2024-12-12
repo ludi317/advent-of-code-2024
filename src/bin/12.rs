@@ -60,15 +60,34 @@ fn dfs2(grid: &mut Vec<Vec<char>>, r: usize, c: usize) -> (usize, usize) {
     let mut area = 1;
     let mut sides = 0;
 
-    let mut is_outside_region: [bool; 8] = [false, false, false, false,false, false, false, false];
-    for (i, dir) in DIAG_DIRECTIONS.iter().enumerate() {
+    let mut is_outside_region = [false; 8];
+
+    for (i, dir) in DIRECTIONS.iter().enumerate() {
         let nr = r.wrapping_add_signed(dir.0);
         let nc = c.wrapping_add_signed(dir.1);
         if nr == usize::MAX || nr == grid.len() || nc == usize::MAX || nc == grid[0].len() ||
             (grid[nr][nc] != orig && grid[nr][nc] != orig.to_ascii_lowercase() ) {
             is_outside_region[i] = true;
+            continue
+        }
+        if grid[nr][nc] != orig {
+            continue
+        }
+        let (partial_area, partial_sides) = dfs2(grid, nr, nc);
+        area += partial_area;
+        sides += partial_sides;
+
+    }
+
+    for i in 4..DIAG_DIRECTIONS.len() {
+        let nr = r.wrapping_add_signed(DIAG_DIRECTIONS[i].0);
+        let nc = c.wrapping_add_signed(DIAG_DIRECTIONS[i].1);
+        if nr == usize::MAX || nr == grid.len() || nc == usize::MAX || nc == grid[0].len() ||
+            (grid[nr][nc] != orig && grid[nr][nc] != orig.to_ascii_lowercase() ) {
+            is_outside_region[i] = true;
         }
     }
+
     if is_outside_region[UP] && is_outside_region[LEFT] {
         sides += 1;
     }
@@ -94,22 +113,6 @@ fn dfs2(grid: &mut Vec<Vec<char>>, r: usize, c: usize) -> (usize, usize) {
         sides += 1;
     }
 
-
-
-    for dir in DIRECTIONS.iter() {
-        let nr = r.wrapping_add_signed(dir.0);
-        let nc = c.wrapping_add_signed(dir.1);
-        if nr == usize::MAX || nr == grid.len() || nc == usize::MAX || nc == grid[0].len() ||
-            (grid[nr][nc] != orig && grid[nr][nc] != orig.to_ascii_lowercase() ) {
-            continue
-        }
-        if grid[nr][nc] != orig {
-            continue
-        }
-        let (partial_area, partial_sides) = dfs2(grid, nr, nc);
-        area += partial_area;
-        sides += partial_sides;
-    }
     (area, sides)
 }
 
