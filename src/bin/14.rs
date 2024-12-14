@@ -1,13 +1,13 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::{HashSet};
 use advent_of_code::get_nums;
 
 advent_of_code::solution!(14);
 
 pub fn part_one(input: &str) -> Option<usize> {
-    // let width = 11;
-    let width = 101;
-    // let height = 7;
-    let height = 103;
+    count_quad_prod(input, 11, 7)
+}
+
+pub fn count_quad_prod(input: &str, width: isize, height: isize) ->  Option<usize> {
     let num_seconds = 100;
     let mut quad_counts = [[0usize;2]; 2];
     for line in input.lines() {
@@ -15,24 +15,9 @@ pub fn part_one(input: &str) -> Option<usize> {
 
         let x = (((num_seconds * nums[2] + nums[0]) % width) + width)%width;
         let y = (((num_seconds * nums[3] + nums[1]) % height) + height)%height;
-        // println!("{:?}", nums);
-        // println!("{x}, {y}");
-        let i1 = if x < width / 2 {
-            0
-        } else if x > width / 2 {
-            1
-        } else {
-            continue
-        };
-        let i2 = if y < height / 2 {
-            0
-        } else if y > height / 2 {
-            1
-        } else {
-            continue
-        };
+        let i1 = if x < width / 2 { 0 } else if x > width / 2 { 1 } else { continue };
+        let i2 = if y < height / 2 { 0 } else if y > height / 2 { 1 } else { continue };
         quad_counts[i1][i2] += 1;
-        // println!("{:?}", quad_counts);
     }
 
     Some(quad_counts[0][0] * quad_counts[1][0]*quad_counts[0][1]*quad_counts[1][1])
