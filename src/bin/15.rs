@@ -155,11 +155,7 @@ pub fn part_two(input: &str) -> Option<usize> {
                         for _ in 0..box_side_count {
                             let prev_r = rr.wrapping_add_signed(-dir.0);
                             let prev_c = cc.wrapping_add_signed(-dir.1);
-                            match grid[prev_r][prev_c] {
-                                '[' => grid[rr][cc] = '[',
-                                ']' => grid[rr][cc] = ']',
-                                _ => unreachable!()
-                            }
+                            grid[rr][cc] = grid[prev_r][prev_c];
                             rr = prev_r;
                             cc = prev_c;
                         }
@@ -169,14 +165,10 @@ pub fn part_two(input: &str) -> Option<usize> {
 
                         continue 'outer;
                     },
-                    '[' => {
+                    '[' | ']' => {
                         box_side_count += 1;
                         continue;
                     },
-                    ']' => {
-                        box_side_count += 1;
-                        continue;
-                    }
                     '#' => {
                         continue 'outer;
                     },
