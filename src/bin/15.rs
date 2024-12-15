@@ -19,11 +19,6 @@ pub fn part_one(input: &str) -> Option<usize> {
 
     }
 
-    for g in &grid {
-        println!("{:?}", g);
-    }
-    println!("{:?}", dirs);
-    println!();
     let mut r = 0;
     let mut c = 0;
     for rr in 0..grid.len() {
@@ -38,10 +33,6 @@ pub fn part_one(input: &str) -> Option<usize> {
 
     'outer: for d in dirs {
         grid[r][c] = '@';
-        println!("{d}");
-        for g in &grid {
-            println!("{:?}", g);
-        }
         grid[r][c] = '.';
         let dir =
         match d {
@@ -49,10 +40,10 @@ pub fn part_one(input: &str) -> Option<usize> {
             '>' => (0, 1),
             'v' => (1,0),
             '<' => (0,-1),
-            _ => panic!("invalid direction")
+            _ => unreachable!()
         };
         let mut box_count = 0;
-        for m in 1..100 {
+        for m in 1.. {
             let nr = r.wrapping_add_signed(m * dir.0);
             let nc = c.wrapping_add_signed(m * dir.1);
             // hit a wall before going out of bounds
@@ -72,12 +63,8 @@ pub fn part_one(input: &str) -> Option<usize> {
                     box_count+= 1;
                     continue;
                 },
-                '#' => {
-                    continue 'outer;
-                },
-                _ => {
-                    panic!()
-                }
+                '#' => continue 'outer,
+                _ =>  unreachable!(),
             }
         }
     }
@@ -110,19 +97,11 @@ pub fn part_two(input: &str) -> Option<usize> {
             let mut exp_line: Vec<char> = Vec::new();
             for ch in line.chars() {
                 match ch {
-                    '#' => {
-                        exp_line.extend("##".chars());
-                    },
-                    'O' => {
-                        exp_line.extend("[]".chars());
-                    },
-                    '.' => {
-                        exp_line.extend("..".chars());
-                    },
-                    '@' => {
-                        exp_line.extend("@.".chars());
-                    }
-                    _ => panic!()
+                    '#' => exp_line.extend("##".chars()),
+                    'O' => exp_line.extend("[]".chars()),
+                    '.' => exp_line.extend("..".chars()),
+                    '@' => exp_line.extend("@.".chars()),
+                    _ => unreachable!()
                 }
             }
             grid.push(exp_line);
@@ -132,11 +111,6 @@ pub fn part_two(input: &str) -> Option<usize> {
 
     }
 
-    for g in &grid {
-        println!("{:?}", g);
-    }
-    println!("{:?}", dirs);
-    println!();
     let mut r = 0;
     let mut c = 0;
     for rr in 0..grid.len() {
@@ -150,19 +124,19 @@ pub fn part_two(input: &str) -> Option<usize> {
     }
 
     'outer: for d in dirs {
-        grid[r][c] = '@';
-        println!("{d}");
-        for g in &grid {
-            println!("{:?}", g.iter().collect::<String>());
-        }
-        grid[r][c] = '.';
+        // grid[r][c] = '@';
+        // println!("{d}");
+        // for g in &grid {
+        //     println!("{:?}", g.iter().collect::<String>());
+        // }
+        // grid[r][c] = '.';
         let dir =
             match d {
                 '^' => (-1, 0),
                 '>' => (0, 1),
                 'v' => (1,0),
                 '<' => (0,-1),
-                _ => panic!("invalid direction")
+                _ => unreachable!()
             };
         if d == '>' || d == '<' {
             let mut box_side_count = 0;
@@ -242,19 +216,15 @@ pub fn part_two(input: &str) -> Option<usize> {
                         }
 
                     },
-                    '#' => {
-                       // no op
-                    },
-                    _ => {
-                        unreachable!()
-                    }
+                    '#' => (),
+                    _ => unreachable!()
             }
 
         }
     }
-    for g in &grid {
-        println!("{:?}", g.iter().collect::<String>());
-    }
+    // for g in &grid {
+    //     println!("{:?}", g.iter().collect::<String>());
+    // }
 
     let mut sum = 0;
     for r in 0..grid.len() {
