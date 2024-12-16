@@ -17,15 +17,11 @@ pub fn part_one(input: &str) -> Option<usize> {
     let mut grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
     let mut heap: PairingHeap<State, usize> = PairingHeap::new();
     let mut costs: HashMap<State, usize> = HashMap::new();
-    'outer: for r in 0..grid.len() {
-        for c in 0..grid[0].len() {
-            if grid[r][c] == 'S' {
-                heap.insert(State{r, c, d_idx: EAST}, 0);
-                costs.insert(State{r, c, d_idx: EAST}, 0);
-                break 'outer;
-            }
-        }
-    }
+    let sr = grid.len() - 2;
+    let sc = 1;
+    assert_eq!(grid[sr][sc], 'S');
+    heap.insert(State{r:sr, c:sc, d_idx: EAST}, 0);
+    costs.insert(State{r:sr, c:sc, d_idx: EAST}, 0);
     while let Some((state, cost)) = heap.delete_min() {
         if grid[state.r][state.c] == 'E' {
             return Some(cost)
@@ -48,8 +44,6 @@ pub fn part_one(input: &str) -> Option<usize> {
     None
 }
 
-
-
 pub fn part_two(input: &str) -> Option<usize> {
     let mut grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
     let mut heap: PairingHeap<State, usize> = PairingHeap::new();
@@ -57,17 +51,14 @@ pub fn part_two(input: &str) -> Option<usize> {
     let mut min_cost = 0;
     let mut pos: HashSet<(usize, usize)> = HashSet::new();
     let mut paths: HashMap<State, HashSet<(usize, usize)>> = HashMap::new();
-    'outer: for r in 0..grid.len() {
-        for c in 0..grid[0].len() {
-            if grid[r][c] == 'S' {
-                let state = State{r, c, d_idx:1};
-                heap.insert(state, 0);
-                costs.insert(state, 0);
-                paths.insert(state, HashSet::from([(r, c)]));
-                break 'outer;
-            }
-        }
-    }
+    let sr = grid.len() - 2;
+    let sc = 1;
+    assert_eq!(grid[sr][sc], 'S');
+    let state = State{r:sr, c:sc, d_idx: EAST};
+    heap.insert(state, 0);
+    costs.insert(state, 0);
+    paths.insert(state, HashSet::from([(sr, sc)]));
+
     // let mut grid_debug = grid.clone();
     while let Some((state, cost)) = heap.delete_min() {
         if grid[state.r][state.c] == 'E' {
