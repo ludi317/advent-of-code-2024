@@ -14,7 +14,7 @@ const DIRECTIONS: [(isize,isize); 4] = [(-1,0),(0,1),(1,0),(0,-1)];
 const EAST: usize = 1;
 
 pub fn part_one(input: &str) -> Option<usize> {
-    let mut grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
+    let grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
     let mut heap: PairingHeap<State, usize> = PairingHeap::new();
     let mut costs: HashMap<State, usize> = HashMap::new();
     let sr = grid.len() - 2;
@@ -45,29 +45,23 @@ pub fn part_one(input: &str) -> Option<usize> {
 }
 
 pub fn part_two(input: &str) -> Option<usize> {
-    let mut grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
+    let grid: Vec<Vec<char>> = input.lines().map(|line| line.chars().collect()).collect();
     let mut heap: PairingHeap<State, usize> = PairingHeap::new();
     let mut costs: HashMap<State, usize> = HashMap::new();
-    let mut min_cost = 0;
     let mut pos: HashSet<(usize, usize)> = HashSet::new();
-    let mut paths: HashMap<State, HashSet<(usize, usize)>> = HashMap::new();
+    let mut parents: HashMap<State, Vec<State>> = HashMap::new();
     let sr = grid.len() - 2;
     let sc = 1;
     assert_eq!(grid[sr][sc], 'S');
     let state = State{r:sr, c:sc, d_idx: EAST};
     heap.insert(state, 0);
     costs.insert(state, 0);
-    paths.insert(state, HashSet::from([(sr, sc)]));
 
     // let mut grid_debug = grid.clone();
     while let Some((state, cost)) = heap.delete_min() {
         if grid[state.r][state.c] == 'E' {
-            if min_cost == 0 || min_cost == cost {
-                min_cost = cost;
-                pos.extend(&paths[&state]);
-                // println!("{cost}");
-                continue
-            } else {
+                walk_ancestors(state, &parents, &mut pos);
+                pos.insert((state.r, state.c));
                 // for (r,c) in pos.iter() {
                 //     grid_debug[*r][*c] = 'O';
                 // }
@@ -75,8 +69,6 @@ pub fn part_two(input: &str) -> Option<usize> {
                 //     println!("{:?}", g.iter().collect::<String>());
                 // }
                 return Some(pos.len())
-            }
-
         }
 
 
@@ -89,22 +81,25 @@ pub fn part_two(input: &str) -> Option<usize> {
                 if !costs.contains_key(&new_state) || costs[&new_state] > new_cost {
                     heap.insert(new_state, new_cost);
                     costs.insert(new_state, new_cost);
-                    // overwrite paths with new_path = state + (nr, nc)
-                    let mut new_path = paths[&state].clone();
-                    new_path.insert((nr,nc));
-                    paths.insert(new_state, new_path);
+                    // overwrite parents
+                    parents.insert(new_state, vec![state]);
                 } else if costs[&new_state] == new_cost {
-                    // an equally good path -- add new path to paths
-                    let state_paths = paths[&state].clone();
-                    paths.get_mut(&new_state).unwrap().extend(state_paths);
-                    paths.get_mut(&new_state).unwrap().insert((nr, nc));
+                    // an equally good path -- add to parents
+                    parents.get_mut(&new_state).unwrap().push(state);
                 }
             }
         }
-
     }
-
     None
+}
+
+fn walk_ancestors(child: State, parents: &HashMap<State, Vec<State>>, pos: &mut HashSet<(usize, usize)>) {
+    if let Some(ps) = parents.get(&child) {
+        for p in ps {
+            pos.insert((p.r, p.c));
+            walk_ancestors(*p, parents, pos);
+        }
+    }
 }
 
 #[cfg(test)]
