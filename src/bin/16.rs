@@ -50,6 +50,7 @@ pub fn part_two(input: &str) -> Option<usize> {
     let mut costs: HashMap<State, usize> = HashMap::new();
     let mut pos: HashSet<(usize, usize)> = HashSet::new();
     let mut parents: HashMap<State, Vec<State>> = HashMap::new();
+    let mut min_cost = 0;
     let sr = grid.len() - 2;
     let sc = 1;
     assert_eq!(grid[sr][sc], 'S');
@@ -57,20 +58,17 @@ pub fn part_two(input: &str) -> Option<usize> {
     heap.insert(state, 0);
     costs.insert(state, 0);
 
-    // let mut grid_debug = grid.clone();
     while let Some((state, cost)) = heap.delete_min() {
         if grid[state.r][state.c] == 'E' {
+            if min_cost == 0 || min_cost == cost {
+                min_cost = cost;
                 walk_ancestors(state, &parents, &mut pos);
                 pos.insert((state.r, state.c));
-                // for (r,c) in pos.iter() {
-                //     grid_debug[*r][*c] = 'O';
-                // }
-                // for g in &grid_debug {
-                //     println!("{:?}", g.iter().collect::<String>());
-                // }
+                continue
+            } else {
                 return Some(pos.len())
+            }
         }
-
 
         for d_ix in [state.d_idx, (state.d_idx+3)%4, (state.d_idx + 1)%4] {
             let nr = state.r.wrapping_add_signed(DIRECTIONS[d_ix].0);
