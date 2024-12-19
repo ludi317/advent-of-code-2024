@@ -12,9 +12,11 @@ fn can_make(patterns: &Vec<&str>, design: &str) -> bool {
     let mut dp = vec![false; design.len()+1];
     dp[0] = true;
     for i in 0..design.len() {
+        if !dp[i] {
+            continue
+        }
         for &p in patterns {
-            if dp[i] && i + p.len() <= design.len() &&
-                design[i..i + p.len()] == *p {
+            if design[i..].starts_with(p) {
                 dp[i+ p.len()] = true
             }
         }
@@ -26,9 +28,11 @@ fn num_ways(patterns: &Vec<&str>, design: &str) -> usize {
     let mut dp = vec![0; design.len()+1];
     dp[0] = 1;
     for i in 0..design.len() {
+        if dp[i] == 0 {
+            continue
+        }
         for &p in patterns {
-            if dp[i] > 0 && i + p.len() <= design.len() &&
-                design[i..i + p.len()] == *p {
+            if design[i..].starts_with(p) {
                 dp[i+ p.len()] += dp[i]
             }
         }
